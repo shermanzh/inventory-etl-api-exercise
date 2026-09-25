@@ -1,0 +1,85 @@
+class InventoryUploadsController < ApplicationController
+  UPLOAD_FIELDS = %i[
+    upc internal_id price quantity department name properties tags
+  ].freeze
+
+  def create
+    rows = permitted_rows
+    return render_empty_upload if rows.empty?
+
+    batch_id = SecureRandom.uuid
+    units = rows.map { |attributes| InventoryUnit.new(attributes.merge(batch_id: batch_id)) }
+    validation_errors = collect_validation_errors(units)
+
+    if validation_errors.any?
+      render json: { errors: validation_errors }, status: :unprocessable_content
+      return
+    end
+
+    units.each(&:save!)
+    render json: { batch_id: batch_id, number_of_units: units.length }, status: :created
+  end
+
+  def index
+    summaries = InventoryUnit.collection.aggregate(summary_pipeline).map do |document|
+      {
+        batch_id: document.fetch("_id"),
+        number_of_units: document.fetch("number_of_units"),
+        average_price: decimal_number(document.fetch("average_price")).round(2),
+        total_quantity: decimal_number(document.fetch("total_quantity"))
+      }
+    end
+
+    render json: summaries
+  end
+
+  private
+
+  def permitted_rows
+    rows = params[:_json]
+    unless rows.is_a?(Array) && rows.all? { |row| row.is_a?(ActionController::Parameters) }
+      raise ActionController::ParameterMissing, "request body must be a JSON array"
+    end
+
+    rows.map do |row|
+      row.permit(
+        *UPLOAD_FIELDS.excluding(:properties, :tags),
+        properties: {},
+        tags: []
+      ).to_h
+    end
+  end
+
+  def collect_validation_errors(units)
+    units.each_with_index.filter_map do |unit, index|
+      next if unit.valid?
+
+      { index: index, errors: unit.errors.to_hash }
+    end
+  end
+
+  def render_empty_upload
+    render json: { errors: [ "request body must contain at least one inventory unit" ] },
+      status: :unprocessable_content
+  end
+
+  def summary_pipeline
+    [
+      {
+        "$group" => {
+          "_id" => "$batch_id",
+          "number_of_units" => { "$sum" => 1 },
+          "average_price" => { "$avg" => "$price" },
+          "total_quantity" => { "$sum" => "$quantity" },
+          "created_at" => { "$min" => "$created_at" }
+        }
+      },
+      { "$sort" => { "created_at" => -1 } }
+    ]
+  end
+
+  def decimal_number(value)
+    value = value.to_big_decimal if value.respond_to?(:to_big_decimal)
+    value.to_f
+  end
+end

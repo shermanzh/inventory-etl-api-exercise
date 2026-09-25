@@ -1,0 +1,35 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+
+# Generated ETL data
+inventory_etl/inventory_export.csv
+inventory_etl/downloaded_inventory.csv
+
+# Ruby and Bundler
+inventory_api/.bundle/
+inventory_api/vendor/bundle/
+
+# Rails environment and secrets
+inventory_api/.env*
+inventory_api/config/*.key
+
+# Rails logs
+inventory_api/log/*
+!inventory_api/log/.keep
+
+# Rails temporary files
+inventory_api/tmp/*
+!inventory_api/tmp/.keep
+!inventory_api/tmp/pids/
+inventory_api/tmp/pids/*
+!inventory_api/tmp/pids/.keep
