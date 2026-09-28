@@ -1,4 +1,5 @@
 """Small JSON client for the Rails inventory uploads API."""
+# upload command passes in-memory transformed records here
 
 from __future__ import annotations
 
@@ -62,7 +63,7 @@ def upload_inventory(
 def list_uploads(api_base_url: str) -> Any:
     return request_json("GET", inventory_uploads_url(api_base_url))
 
-
+# Produces API-ready JSON by converting fields initially suitable for CSV
 def row_for_api(row: Mapping[str, str]) -> dict[str, Any]:
     """Convert a CSV-ready transformed row into a typed JSON record."""
 

@@ -1,3 +1,6 @@
+# Defines the Rails frameworks the application loads
+# Active Record is commented out as app was created with --skip-active-record
+
 require_relative "boot"
 
 require "rails"
@@ -39,6 +42,6 @@ module InventoryApi
     # Only loads a smaller set of middleware suitable for API only apps.
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
-    config.api_only = true
+    config.api_only = true # Enables API-only behavior
   end
 end

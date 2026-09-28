@@ -46,12 +46,12 @@ def margin_ratio(price: Decimal, cost: Decimal) -> Decimal:
         return Decimal("0")
     return (price - cost) / cost
 
-
+# Business rules, clean whitespace
 def transform_row(
     row: Mapping[str, str], duplicate_item_numbers: set[str]
 ) -> dict[str, str] | None:
     if not sold_during_2020(row.get("Last_Sold")):
-        return None
+        return None # Disincludes items not sold in 2020
 
     item_number = clean(row.get("ItemNum"))
     item_name = clean(row.get("ItemName"))
@@ -64,15 +64,16 @@ def transform_row(
     margin = margin_ratio(price, cost)
     high_margin = margin > config.MARGIN_THRESHOLD
 
-    multiplier = (
+    multiplier = ( # If (price - cost) / cost > 30%, it is high-margin and * 1.07, otherwise * 1.09 and round to 2 decimal places
         config.HIGH_MARGIN_PRICE_MULTIPLIER
         if high_margin
         else config.OTHER_PRICE_MULTIPLIER
     )
     adjusted_price = (price * multiplier).quantize(
-        Decimal("0.01"), rounding=ROUND_HALF_UP
+        Decimal("0.01"), rounding=ROUND_HALF_UP # Decimal instead of float so monetary rounding is predictable
     )
 
+    # Tags field for duplicate SKU, high or low margins and encoded as JSON for CSV storage
     tags: list[str] = []
     if item_number in duplicate_item_numbers:
         tags.append("duplicate_sku")
@@ -81,6 +82,7 @@ def transform_row(
     elif margin < config.MARGIN_THRESHOLD:
         tags.append("low_margin")
 
+    # Validates UPC as ASCII digits only and at least 6 characters long, otherwise use internal_id
     valid_upc = bool(UPC_PATTERN.fullmatch(item_number))
     return {
         "upc": item_number if valid_upc else "",
@@ -88,8 +90,8 @@ def transform_row(
         "price": f"{adjusted_price:.2f}",
         "quantity": clean(row.get("In_Stock")),
         "department": department,
-        "name": " ".join(part for part in (item_name, item_extra) if part),
-        "properties": json.dumps(
+        "name": " ".join(part for part in (item_name, item_extra) if part), # Join ItemName and ItemName_Extra with a space
+        "properties": json.dumps( # Contains a JSON string
             {
                 "department": department,
                 "vendor": vendor,
@@ -98,7 +100,7 @@ def transform_row(
             separators=(",", ":"),
             ensure_ascii=False,
         ),
-        "tags": json.dumps(tags, separators=(",", ":")),
+        "tags": json.dumps(tags, separators=(",", ":")), # Contains a JSON string
     }
 
 

@@ -1,3 +1,9 @@
+# Answers what an inventory unit looks like, which values are valid, how each value should be stored, which fields should MongoDB index
+# Replaces ActiveRecord with Mongoid - no SQL tables or migrations
+
+# Invalid records returns HTTP 422 with its position and errors, and batch is not saved
+
+# Defines MongoDB fields for an an inventory unit, numeric types for price and quantity, hash and array types for properties and tags, model validation, and MongoDB index on batch_id
 class InventoryUnit
   include Mongoid::Document
   include Mongoid::Timestamps::Created

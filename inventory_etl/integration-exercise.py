@@ -16,9 +16,9 @@ if str(SRC_ROOT) not in sys.path:
 
 from inventory_etl import api_client, config, duplicates, fetch, parse, transform, writer
 
-
+# Begins generate_csv and upload commands
 def load_and_transform(args: argparse.Namespace) -> list[dict[str, str]]:
-    _location, content = fetch.fetch_inventory_bytes(args.initial_html_url)
+    _location, content = fetch.fetch_inventory_bytes(args.initial_html_url) # Begins generate_csv and upload commands
 
     if args.flow == "file":
         fetch.save_bytes(content, args.download_path)
@@ -29,7 +29,10 @@ def load_and_transform(args: argparse.Namespace) -> list[dict[str, str]]:
     duplicate_ids = duplicates.find_duplicate_item_numbers(source_rows)
     return transform.transform_rows(source_rows, duplicate_ids)
 
-
+# 3 possible commands: Downloads S3 Data? Runs Transformations? Needs Rails? Needs MongoDB?
+# generate_csv: Y,Y,N,N
+# upload: Y,Y,Y,Y
+# list_uploads: N,N,Y,Y
 def build_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -52,6 +55,8 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--api-base-url", default=config.DEFAULT_API_BASE_URL)
     return parser
 
+
+# Reads command-line arguments and produces an argparse.Namespace
 
 def main() -> int:
     args = build_argument_parser().parse_args()

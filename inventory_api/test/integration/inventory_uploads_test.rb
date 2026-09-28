@@ -1,3 +1,7 @@
+# Tests complete HTTP behavior of app/controllers/inventory_uploads_controller.rb
+# Tests the following: uploading a batch, sharing one batch ID, recording creation timestamps, rejecting invalid batches or empty uploads, and returning correct summaries
+# This is an integration test as it cross several layers: route → controller → model → MongoDB → JSON response
+
 require "test_helper"
 
 class InventoryUploadsTest < ActionDispatch::IntegrationTest

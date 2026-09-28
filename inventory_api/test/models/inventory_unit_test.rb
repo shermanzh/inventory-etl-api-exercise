@@ -1,3 +1,7 @@
+# Tests app/models/inventory_unit.rb model in isolation
+# Checks the following: valid inventory units, identifier requirements, internal ID formatting, numeric fields and validation
+# This is an integration test as it cross several layers: route → controller → model → MongoDB → JSON response
+
 require "test_helper"
 
 class InventoryUnitTest < ActiveSupport::TestCase

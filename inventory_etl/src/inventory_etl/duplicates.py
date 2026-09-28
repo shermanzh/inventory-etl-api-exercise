@@ -3,7 +3,7 @@
 from collections import Counter
 from typing import Iterable, Mapping
 
-
+# Returns set of REPEATING values, and is given to transform_rows()
 def find_duplicate_item_numbers(rows: Iterable[Mapping[str, str]]) -> set[str]:
     counts = Counter(
         (row.get("ItemNum") or "").strip()

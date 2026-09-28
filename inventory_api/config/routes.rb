@@ -1,3 +1,8 @@
+# Maps URLs and HTTP methods to controller actions
+# Produces the following:
+# GET  /inventory_uploads.json → inventory_uploads#index - command list_uploads - performs #index and returns summaries as JSON
+# POST /inventory_uploads.json → inventory_uploads#create - performs #create and returns HTTP 201 with batch ID and record count if valid, otherwise HTTP 422 with validation errors
+
 Rails.application.routes.draw do
   resources :inventory_uploads, only: %i[index create]
 

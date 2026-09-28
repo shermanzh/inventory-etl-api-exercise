@@ -1,3 +1,9 @@
+# MongoDB connection settings, separates databases to prevent automated tests from erasing or contaminating development data
+# Enabled MongoDB Decimal128 storage for prices and quantities
+# Development uses inventory_api_development
+# Tests use inventory_api_test
+
+
 development:
   # Configure available database clients. (required)
   clients:

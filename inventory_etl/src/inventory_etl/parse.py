@@ -23,7 +23,7 @@ def unique_fieldnames(fieldnames: Iterable[str]) -> list[str]:
         unique_names.append(name if occurrence == 1 else f"{name}__{occurrence}")
     return unique_names
 
-
+# Creates DictReader with unique fieldnames, checks for required fields, and filters out rows with empty or invalid ItemNum
 def parse_stream(stream: TextIO) -> list[dict[str, str]]:
     reader = csv.DictReader(stream, delimiter="|")
     original_fieldnames = reader.fieldnames

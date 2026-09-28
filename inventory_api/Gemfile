@@ -1,3 +1,10 @@
+# Lists the Ruby libraries the application requests, including Rails, Puma, Mongoid, and testing and quality tools
+# Similar to Python's dependency declaration
+
+# Note: Gemfile.lock records the exact versions Bundler installed
+# i.e. Gemfile might request Mongoid 9.1, and lock file records exact version 9.1.1, making reproducible installations across machines
+# A user updates Gemfile, and the bundler updates Gemfile.lock
+
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
@@ -41,4 +48,4 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 end
 
-gem "mongoid", "~> 9.1"
+gem "mongoid", "~> 9.1" # From "bundle add mongoid"

@@ -1,14 +1,18 @@
+# Belongs in controller as it handles HTTP input/output
+# Implements HTTP operations "create" and "index" action
+
 class InventoryUploadsController < ApplicationController
   UPLOAD_FIELDS = %i[
     upc internal_id price quantity department name properties tags
   ].freeze
 
+  # Reads JSON array, rejects empty upload, generates one UUID batch ID, builds an InventoryUnit for every row, validates every row, saves the batch, returns batch ID and record count
   def create
     rows = permitted_rows
     return render_empty_upload if rows.empty?
 
-    batch_id = SecureRandom.uuid
-    units = rows.map { |attributes| InventoryUnit.new(attributes.merge(batch_id: batch_id)) }
+    batch_id = SecureRandom.uuid # Assigns batch ID to all records that arrived together
+    units = rows.map { |attributes| InventoryUnit.new(attributes.merge(batch_id: batch_id)) } # Each JSON unit becomes InventoryUnit.new(..)
     validation_errors = collect_validation_errors(units)
 
     if validation_errors.any?
@@ -16,10 +20,11 @@ class InventoryUploadsController < ApplicationController
       return
     end
 
-    units.each(&:save!)
+    units.each(&:save!) # Mongoid writes one MongoDB document per inventory unit if every model is valid
     render json: { batch_id: batch_id, number_of_units: units.length }, status: :created
   end
 
+  # Groups stored records by batch_id, counts records in each batch, calculates average price and total quantity, and returns summaries as JSON
   def index
     summaries = InventoryUnit.collection.aggregate(summary_pipeline).map do |document|
       {
@@ -35,6 +40,7 @@ class InventoryUploadsController < ApplicationController
 
   private
 
+  # Permits only expected fields, preventing arbitrary unexpected fields from entering MongoDB
   def permitted_rows
     rows = params[:_json]
     unless rows.is_a?(Array) && rows.all? { |row| row.is_a?(ActionController::Parameters) }
